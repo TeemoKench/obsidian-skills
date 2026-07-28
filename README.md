@@ -2,7 +2,7 @@
 
 Agent Skills for use with Obsidian.
 
-Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with a small customization: **`obsidian-cli` removed** (not needed in this setup). Everything else is kept.
+Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with customizations: **`obsidian-cli` removed**; added **`obsidian-user-vault`** (Wei vault rules: no-space filenames, `createBy`/`updateBy`).
 
 These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code, Codex, Open Code, and Hermes.
 
@@ -57,6 +57,7 @@ OpenCode auto-discovers all `SKILL.md` files under `~/.opencode/skills/`. No cha
 | [obsidian-bases](skills/obsidian-bases) | Create and edit [Obsidian Bases](https://help.obsidian.md/bases/syntax) (`.base`) with views, filters, formulas, and summaries |
 | [json-canvas](skills/json-canvas) | Create and edit [JSON Canvas](https://jsoncanvas.org/) files (`.canvas`) with nodes, edges, groups, and connections |
 | [defuddle](skills/defuddle) | Extract clean markdown from web pages using [Defuddle](https://github.com/kepano/defuddle), removing clutter to save tokens |
+| [obsidian-user-vault](skills/obsidian-user-vault) | Wei vault playbook: PARA paths, **no spaces in filenames** (`-` separators), frontmatter `createBy`/`updateBy` for AI agents, headless Sync (`ob`) |
 
 ## Upstream
 

@@ -8,8 +8,8 @@
     {
       "name": "obsidian",
       "source": "./",
-      "description": "Claude Skills for Obsidian (fork without obsidian-cli)",
-      "version": "1.0.2"
+      "description": "Obsidian skills fork: no obsidian-cli; includes obsidian-user-vault",
+      "version": "1.1.0"
     }
   ]
 }
