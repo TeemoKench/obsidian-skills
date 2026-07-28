@@ -2,8 +2,9 @@
 
 Official docs: https://obsidian.md/help/sync/headless
 
-Use with `obsidian-user-vault`. Resolve paths from `local-config.md` or env (`OBSIDIAN_VAULT_PATH`, `OBSIDIAN_OB_HOME`, …). Below, `$VAULT` and `$OB_HOME` mean those resolved absolute values.
+Optional companion for `obsidian-user-vault`. Use this doc when filling §4 Sync placeholders in `SKILL.md` during [`init_guide.md`](../init_guide.md) (check / repair commands).
 
+Below, `$VAULT` is the absolute vault root from the skill; `$OB_HOME` is the HOME used for `ob` login (agent user, not root).
 ## Identity (critical)
 
 `ob` stores login under **`$HOME/.config/obsidian-headless/`**.
@@ -94,6 +95,16 @@ ob sync-status --path "$VAULT"
 
 If you accidentally logged in as root (or another user), copy the config directory into the agent user's `OBSIDIAN_OB_HOME/.config/obsidian-headless/`, fix ownership, then `ob login` / `ob sync-status` as the agent user.
 
-## LifeTips placement tip
+## Mapping into SKILL.md placeholders
 
-Short life SOPs/recipes → `3-Resources/LifeTips/<name-with-dashes>.md` under `$VAULT`.
+When initializing `obsidian-user-vault`, map this host’s commands into:
+
+| Placeholder | Typical source |
+|-------------|----------------|
+| `{{VAULT_ROOT}}` | `$VAULT` absolute path |
+| `{{SYNC_CHECK_COMMANDS}}` | pre-write gate block above |
+| `{{SYNC_HEALTH_CRITERIA}}` | continuous alive + log not in hard error loop |
+| `{{SYNC_REPAIR_COMMANDS}}` | stop wedged continuous → restart → re-check |
+| `{{SYNC_LIGHT_CHECK}}` | e.g. same session: only `pgrep` / is-active equivalent |
+
+Do not hard-code another user’s paths into the shared template without init.
