@@ -9,6 +9,13 @@ Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with
 
 These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code, Codex, Open Code, and Hermes.
 
+## Who this is for
+
+- **Linux / no-GUI / pure CLI users** — Aimed at headless servers, VPS, containers, and other environments **without a desktop Obsidian app**. Agents work on the vault as files on disk and (optionally) drive sync from the terminal. Desktop-only tooling such as `obsidian-cli` is **not** included in this fork.
+- **Official [Obsidian Sync](https://obsidian.md/sync) users** — If your vault already lives on Obsidian Sync, you can use this pack **directly**: point the agent at your local vault folder, and for Linux/CLI hosts use [Headless Sync](https://obsidian.md/help/sync/headless) (`ob`) so the same Sync account stays up to date. See `obsidian-user-vault` (`references/local-config.example.md` + `references/headless-sync.md`) for path setup and a pre-write sync health check.
+
+You do **not** need the Obsidian desktop GUI on the machine where the agent runs. A phone/desktop app elsewhere can still open the same Sync vault.
+
 ## Installation
 
 ### Marketplace
