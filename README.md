@@ -73,3 +73,4 @@ OpenCode auto-discovers all `SKILL.md` files under `~/.opencode/skills/`. No cha
 
 - Upstream: https://github.com/kepano/obsidian-skills
 - License: MIT (see [LICENSE](LICENSE))
+- **Monthly sync (GitHub Actions):** on the **8th of each month** (03:20 UTC) and via **Actions → Sync upstream → Run workflow**, this fork merges `kepano/obsidian-skills` `main`, **deletes `skills/obsidian-cli`**, keeps the other upstream skills plus `obsidian-user-vault`, then pushes `main`. Script: [`scripts/sync-upstream.sh`](scripts/sync-upstream.sh) · workflow: [`.github/workflows/sync-upstream.yml`](.github/workflows/sync-upstream.yml).

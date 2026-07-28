@@ -1,0 +1,47 @@
+# Sync fork from kepano/obsidian-skills (monthly + manual)
+#
+# - merge upstream/main when behind
+# - always remove skills/obsidian-cli
+# - keep custom skills (e.g. obsidian-user-vault) and fork README policy
+#
+# Schedule: 8th of each month 03:20 UTC (same window as the old Hermes cron)
+
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: "20 3 8 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          # default GITHUB_TOKEN can push back to this repo with contents:write
+          persist-credentials: true
+
+      - name: Sync upstream + enforce no obsidian-cli
+        id: sync
+        run: |
+          chmod +x scripts/sync-upstream.sh
+          ./scripts/sync-upstream.sh
+
+      - name: Result
+        run: |
+          echo "merged=${{ steps.sync.outputs.merged }}"
+          echo "pushed=${{ steps.sync.outputs.pushed }}"
+          echo "before=${{ steps.sync.outputs.before }} after=${{ steps.sync.outputs.after }}"
+          echo "upstream=${{ steps.sync.outputs.upstream }}"
+          echo "skills=${{ steps.sync.outputs.skills }}"
