@@ -24,46 +24,66 @@ You do **not** need the Obsidian desktop GUI on the machine where the agent runs
 
 ## Installation
 
-### Marketplace
+Install skills into **`~/.agents/skills`** (Agent Skills layout). Each skill is a folder with a `SKILL.md`.
 
-```
-/plugin marketplace add TeemoKench/obsidian-skills
-/plugin install obsidian@obsidian-skills
-```
-
-### npx skills
-
-```
-npx skills add git@github.com:TeemoKench/obsidian-skills.git
-```
-
-Instead of ssh, if you prefer to use https:
-
-```
-npx skills add https://github.com/TeemoKench/obsidian-skills
-```
-
-### Manually
-
-#### Claude Code
-
-Add the contents of this repo to a `/.claude` folder in the root of your Obsidian vault (or whichever folder you're using with Claude Code). See more in the [official Claude Skills documentation](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview).
-
-#### Codex
-
-Copy the `skills/` directory into your Codex skills path (typically `~/.codex/skills`). See the [Agent Skills specification](https://agentskills.io/specification) for the standard skill format.
-
-#### OpenCode
-
-Clone the entire repo into the OpenCode skills directory (`~/.opencode/skills/`):
+### Recommended: clone this repo, then link skills
 
 ```sh
-git clone https://github.com/TeemoKench/obsidian-skills.git ~/.opencode/skills/obsidian-skills
+# 1) clone (pick any path you like)
+git clone https://github.com/TeemoKench/obsidian-skills.git ~/src/obsidian-skills
+
+# 2) ensure target dir exists
+mkdir -p ~/.agents/skills
+
+# 3) link each skill into ~/.agents/skills
+for d in ~/src/obsidian-skills/skills/*/; do
+  name="$(basename "$d")"
+  ln -sfn "$d" "$HOME/.agents/skills/$name"
+done
+
+# 4) check
+ls -la ~/.agents/skills
 ```
 
-Do not copy only the inner `skills/` folder — clone the full repo so the directory structure is `~/.opencode/skills/obsidian-skills/skills/<skill-name>/SKILL.md`.
+After linking you should see folders such as:
 
-OpenCode auto-discovers all `SKILL.md` files under `~/.opencode/skills/`. No changes to `opencode.json` or any config file are needed. Skills become available after restarting OpenCode.
+`~/.agents/skills/obsidian-markdown/SKILL.md`  
+`~/.agents/skills/obsidian-user-vault/SKILL.md`  
+…and the other skills in this repo.
+
+Restart or reload your agent so it re-scans skills.
+
+### Alternative: copy (no git updates)
+
+```sh
+mkdir -p ~/.agents/skills
+cp -a ~/src/obsidian-skills/skills/. ~/.agents/skills/
+```
+
+Copying is simple but **won’t** pick up upstream/fork updates until you copy again. Prefer the **clone + symlink** method above, then `git -C ~/src/obsidian-skills pull` when this repo updates.
+
+### Optional: SSH clone
+
+```sh
+git clone git@github.com:TeemoKench/obsidian-skills.git ~/src/obsidian-skills
+# then the same mkdir + ln -sfn loop as above
+```
+
+### Per-host vault config
+
+For `obsidian-user-vault`, copy and edit local config once:
+
+```sh
+cp ~/.agents/skills/obsidian-user-vault/references/local-config.example.md \
+   ~/.agents/skills/obsidian-user-vault/references/local-config.md
+# edit local-config.md — set OBSIDIAN_VAULT_PATH, ob HOME, agent name, etc.
+```
+
+### Notes
+
+- Target path is always **`~/.agents/skills/<skill-name>/SKILL.md`**.
+- Do **not** only copy the repo root without the inner `skills/*` folders.
+- If your agent uses a different skills root, point it at `~/.agents/skills` or symlink that directory accordingly.
 
 ## Skills
 
