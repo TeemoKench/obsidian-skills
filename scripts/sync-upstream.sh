@@ -53,6 +53,13 @@ if [[ -e skills/obsidian-cli ]]; then
   changed=1
 fi
 
+# Policy: never ship Claude marketplace/plugin metadata from upstream
+if [[ -e .claude-plugin ]]; then
+  rm -rf .claude-plugin
+  log "removed .claude-plugin"
+  changed=1
+fi
+
 ALLOWED='defuddle json-canvas obsidian-bases obsidian-markdown obsidian-user-vault'
 if [[ -d skills ]]; then
   for d in skills/*; do
@@ -116,7 +123,7 @@ fi
 if [[ "$changed" -eq 1 ]] || ! git diff --quiet || ! git diff --cached --quiet; then
   git add -A
   if ! git diff --cached --quiet; then
-    git commit -m "chore: drop obsidian-cli after upstream sync (fork policy)"
+    git commit -m "chore: enforce fork policy after upstream sync (no obsidian-cli, no .claude-plugin)"
     changed=1
   fi
 fi

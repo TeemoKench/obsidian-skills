@@ -2,6 +2,7 @@
 #
 # - merge upstream/main when behind
 # - always remove skills/obsidian-cli
+# - always remove .claude-plugin (upstream Claude marketplace metadata; not used here)
 # - keep custom skills (e.g. obsidian-user-vault) and fork README policy
 #
 # Schedule: 8th of each month 03:20 UTC (same window as the old Hermes cron)
