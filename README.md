@@ -1,26 +1,30 @@
+# Obsidian Skills (TeemoKench fork)
+
 Agent Skills for use with Obsidian.
 
-These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code, Codex, and Open Code.
+Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with a small customization: **`obsidian-cli` removed** (not needed in this setup). Everything else is kept.
+
+These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code, Codex, Open Code, and Hermes.
 
 ## Installation
 
 ### Marketplace
 
 ```
-/plugin marketplace add kepano/obsidian-skills
+/plugin marketplace add TeemoKench/obsidian-skills
 /plugin install obsidian@obsidian-skills
 ```
 
 ### npx skills
 
 ```
-npx skills add git@github.com:kepano/obsidian-skills.git
+npx skills add git@github.com:TeemoKench/obsidian-skills.git
 ```
 
 Instead of ssh, if you prefer to use https:
 
 ```
-npx skills add https://github.com/kepano/obsidian-skills
+npx skills add https://github.com/TeemoKench/obsidian-skills
 ```
 
 ### Manually
@@ -38,7 +42,7 @@ Copy the `skills/` directory into your Codex skills path (typically `~/.codex/sk
 Clone the entire repo into the OpenCode skills directory (`~/.opencode/skills/`):
 
 ```sh
-git clone https://github.com/kepano/obsidian-skills.git ~/.opencode/skills/obsidian-skills
+git clone https://github.com/TeemoKench/obsidian-skills.git ~/.opencode/skills/obsidian-skills
 ```
 
 Do not copy only the inner `skills/` folder — clone the full repo so the directory structure is `~/.opencode/skills/obsidian-skills/skills/<skill-name>/SKILL.md`.
@@ -52,5 +56,9 @@ OpenCode auto-discovers all `SKILL.md` files under `~/.opencode/skills/`. No cha
 | [obsidian-markdown](skills/obsidian-markdown) | Create and edit [Obsidian Flavored Markdown](https://help.obsidian.md/obsidian-flavored-markdown) (`.md`) with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax |
 | [obsidian-bases](skills/obsidian-bases) | Create and edit [Obsidian Bases](https://help.obsidian.md/bases/syntax) (`.base`) with views, filters, formulas, and summaries |
 | [json-canvas](skills/json-canvas) | Create and edit [JSON Canvas](https://jsoncanvas.org/) files (`.canvas`) with nodes, edges, groups, and connections |
-| [obsidian-cli](skills/obsidian-cli) | Interact with Obsidian vaults via the [Obsidian CLI](https://help.obsidian.md/cli) including plugin and theme development |
 | [defuddle](skills/defuddle) | Extract clean markdown from web pages using [Defuddle](https://github.com/kepano/defuddle), removing clutter to save tokens |
+
+## Upstream
+
+- Upstream: https://github.com/kepano/obsidian-skills
+- License: MIT (see [LICENSE](LICENSE))
