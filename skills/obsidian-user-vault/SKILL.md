@@ -1,7 +1,7 @@
 ---
 name: obsidian-user-vault
-description: "Use when Wei asks to find, read, rewrite, create, organize, or search notes in his Obsidian vault; also headless Sync status/install/continuous sync. Vault path, PARA, naming rules, createBy/updateBy frontmatter, kepano skills."
-version: 1.3.0
+description: "Use when Wei asks to find, read, rewrite, create, organize, or search notes in his Obsidian vault; also headless Sync status/install/continuous sync. Before ANY vault write: verify headless-sync healthy. Vault path, PARA, naming, createBy/updateBy."
+version: 1.4.0
 author: Minnie (Wei)
 license: MIT
 metadata:
@@ -79,6 +79,50 @@ Don't use for: 纯聊天不碰笔记；改 Hermes 配置（见 `minnie-wei-ops`�
 3. 能放 Project 的不先塞 Area。
 4. 生活向短 SOP/配方 → `3-Resources/LifeTips/`（文件名无空格用 `-`）。
 5. 拿不准 → Inbox + `[[wikilink]]`。
+
+## 强制规则：改 vault 前先检查 Headless Sync
+
+`obsidian-headless` continuous sync **有时会卡死**。对 vault **任何写入/改写/移动/删除**（含 `write_file` / `patch` / terminal 写文件）之前，必须先确认 sync 服务正常；**不正常就先修/拉起，再动内容**。
+
+### 写前检查（每次写操作会话至少做一轮；长任务中若怀疑卡死再查）
+
+```bash
+export HOME=/opt/data/home
+export PATH="/opt/data/home/.npm-global/bin:/opt/data/bin:$PATH"
+
+# 1) continuous 进程在跑？
+pgrep -af 'ob sync.*continuous' || cat /opt/data/logs/obsidian-sync.pid 2>/dev/null
+
+# 2) 最近日志是否还在推进 / 是否 Fully synced（而非卡死报错刷屏）
+tail -40 /opt/data/logs/obsidian-sync.log
+
+# 3) 配置仍绑定本 vault（辅助）
+ob sync-status --path /opt/data/obsidian
+```
+
+### 怎样算「正常」
+
+| 信号 | 期望 |
+|------|------|
+| continuous 进程 | `pgrep` 能看到 `ob sync ... --continuous`，或 pid 文件对应进程仍存活 |
+| 日志 | 近期有活动或出现过 `Fully synced`；无持续卡死、无疯狂重复同一错误占满 |
+| `ob sync-status` | 仍指向 `/opt/data/obsidian` / Claw（只证明配置，**不能单独**当“活着”） |
+
+### 不正常时（先修再写）
+
+1. 看 log 尾部确认卡死/报错类型。
+2. 停掉僵死进程（若 pid 在但无响应）：按 pid/`pkill` 谨慎结束 **continuous** 的 `ob sync`（勿乱杀其它 `ob`）。
+3. 重新拉起：`terminal(background=true)` 执行  
+   `ob sync --path /opt/data/obsidian --continuous`  
+   （日志仍写 `/opt/data/logs/obsidian-sync.log`；也可靠 5m watchdog）。
+4. 再跑一遍写前检查，**通过后再**创建/修改笔记。
+5. 若短时间无法恢复：先告诉 Wei sync 异常与 log 要点，**默认暂停写 vault**；只有 Wei 明确说「先本地写、同步稍后」才继续写。
+
+### 范围
+
+- **必须检查**：新建/改写/追加/移动/删除笔记与附件等会改 vault 磁盘内容的操作。
+- **可只读不强制**：纯搜索、只读 `read_file`、只问路径/PARA——仍建议偶发确认 sync，但不阻断回答。
+- 细节与安装见 `references/headless-sync.md`。
 
 ## 强制规则：文件名无空格
 
@@ -166,6 +210,7 @@ AI 修改已有笔记：
 
 - 查找：`search_files` 以 `/opt/data/obsidian` 为 path
 - 读取：`read_file` 绝对路径
+- **任何写入前**：按「强制规则：改 vault 前先检查 Headless Sync」确认 continuous 正常
 - 创建：定 PARA 目录 → **无空格文件名** → frontmatter 含 **`createBy` + `updateBy`** → 需 OFM 时先 `skill_view("obsidian-markdown")` → `write_file`
 - 局部改：`patch`（记得更新 `updateBy`）；大改可整写
 - 日记：`5-Daily/YYYY-MM-DD.md`（同样要维护 createBy/updateBy）
@@ -209,6 +254,7 @@ ln -sfn /opt/data/home/.npm-global/bin/ob /opt/data/bin/ob
 
 ## 完成标准
 
+- [ ] **写 vault 前已检查 headless continuous：进程在 + 日志未卡死**
 - [ ] 路径是 `/opt/data/obsidian/...` 绝对路径
 - [ ] 新笔记位置符合 PARA / 用户指定
 - [ ] **新文件名/文件夹名无空格，分隔用 `-`**
@@ -221,22 +267,24 @@ ln -sfn /opt/data/home/.npm-global/bin/ob /opt/data/bin/ob
 
 ## Common Pitfalls
 
-1. **猜路径** — 不信 macOS 旧路径或 `/home/hermes/obsidian`。
-2. **文件工具塞 `$VAR`** — 先解析。
-3. **文件名带空格** — 新建一律 `-`，不要 `My Note.md`。
-4. **漏写 createBy/updateBy** — AI 落盘笔记必须署名。
-5. **修改时覆盖 createBy** — 只更新 `updateBy`。
-6. **跳过 obsidian-markdown** — 双链半吊子。
-7. **Inbox 永久堆积** — 整理时再分类。
-8. **VS Code Attach Shell = root** — 凭证进 `/root/.config/...`，Hermes 看不见。必须 hermes + `HOME=/opt/data/home`；root 登过则拷 config + `chown -R 1000:1000` vault 与 config。
-9. **root 同步后的属主** — `chown -R 1000:1000 /opt/data/obsidian`。
-10. **桌面 Sync + Headless 同设备** — 官方禁止；本机只跑 headless continuous。
-11. **write_file 写 vault 被拦** — 改 terminal 写入，核属主 hermes。
-12. **status 有配置 ≠ continuous 在跑** — 要 pgrep / pid / log。
+1. **sync 卡着还写笔记** — 先 pgrep + tail log；挂了先拉起 continuous。
+2. **只看 `ob sync-status` 当活着** — 那只是配置；要以 continuous 进程和 log 为准。
+3. **猜路径** — 不信 macOS 旧路径或 `/home/hermes/obsidian`。
+4. **文件工具塞 `$VAR`** — 先解析。
+5. **文件名带空格** — 新建一律 `-`，不要 `My Note.md`。
+6. **漏写 createBy/updateBy** — AI 落盘笔记必须署名。
+7. **修改时覆盖 createBy** — 只更新 `updateBy`。
+8. **跳过 obsidian-markdown** — 双链半吊子。
+9. **Inbox 永久堆积** — 整理时再分类。
+10. **VS Code Attach Shell = root** — 凭证进 `/root/.config/...`，Hermes 看不见。必须 hermes + `HOME=/opt/data/home`；root 登过则拷 config + `chown -R 1000:1000` vault 与 config。
+11. **root 同步后的属主** — `chown -R 1000:1000 /opt/data/obsidian`。
+12. **桌面 Sync + Headless 同设备** — 官方禁止；本机只跑 headless continuous。
+13. **write_file 写 vault 被拦** — 改 terminal 写入，核属主 hermes。
+14. **status 有配置 ≠ continuous 在跑** — 要 pgrep / pid / log。
 
 ## Quick map
 
-> Vault=`/opt/data/obsidian` · `ob`+HOME=`/opt/data/home` · PARA · **文件名禁止空格用 `-`** · **createBy/updateBy** · continuous+5m watchdog · 语法 `obsidian-markdown` · headless 见 `references/headless-sync.md`。
+> Vault=`/opt/data/obsidian` · **写前先查 headless continuous** · `ob`+HOME=`/opt/data/home` · PARA · **文件名禁止空格用 `-`** · **createBy/updateBy** · continuous+5m watchdog · 语法 `obsidian-markdown` · headless 见 `references/headless-sync.md`。
 
 ## Support files
 

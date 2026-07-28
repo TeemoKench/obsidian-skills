@@ -83,6 +83,30 @@ ob sync --path /opt/data/obsidian --continuous
 | `pgrep -af 'ob sync.*continuous'` | watcher alive |
 | empty `.obsidian` except empty dir | config categories not synced (expected if disabled) |
 
+## Pre-write gate (mandatory before vault mutations)
+
+Continuous sync **can freeze**. Before create/edit/move/delete under `/opt/data/obsidian`:
+
+```bash
+export HOME=/opt/data/home
+export PATH="/opt/data/home/.npm-global/bin:/opt/data/bin:$PATH"
+pgrep -af 'ob sync.*continuous' || cat /opt/data/logs/obsidian-sync.pid 2>/dev/null
+tail -40 /opt/data/logs/obsidian-sync.log
+ob sync-status --path /opt/data/obsidian
+```
+
+**OK to write:** continuous process alive + log not stuck in a hard error loop.
+
+**If dead/stuck:** inspect log → stop wedged continuous `ob sync` carefully → restart with Hermes `terminal(background=true)`:
+
+```bash
+ob sync --path /opt/data/obsidian --continuous
+```
+
+Re-check, then write. If still broken, tell Wei and **do not write** unless Wei explicitly allows local-only edits.
+
+`ob sync-status` alone is **not** proof the watcher is healthy.
+
 ## LifeTips note placement
 
 Short life SOPs/recipes → `3-Resources/LifeTips/<name-with-dashes>.md`

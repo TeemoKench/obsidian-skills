@@ -57,7 +57,7 @@ OpenCode auto-discovers all `SKILL.md` files under `~/.opencode/skills/`. No cha
 | [obsidian-bases](skills/obsidian-bases) | Create and edit [Obsidian Bases](https://help.obsidian.md/bases/syntax) (`.base`) with views, filters, formulas, and summaries |
 | [json-canvas](skills/json-canvas) | Create and edit [JSON Canvas](https://jsoncanvas.org/) files (`.canvas`) with nodes, edges, groups, and connections |
 | [defuddle](skills/defuddle) | Extract clean markdown from web pages using [Defuddle](https://github.com/kepano/defuddle), removing clutter to save tokens |
-| [obsidian-user-vault](skills/obsidian-user-vault) | Wei vault playbook: PARA paths, **no spaces in filenames** (`-` separators), frontmatter `createBy`/`updateBy` for AI agents, headless Sync (`ob`) |
+| [obsidian-user-vault](skills/obsidian-user-vault) | Wei vault playbook: **check headless-sync before writes**, PARA, no-space filenames (`-`), frontmatter `createBy`/`updateBy`, headless Sync (`ob`) |
 
 ## Upstream
 
