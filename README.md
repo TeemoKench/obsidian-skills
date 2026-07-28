@@ -2,7 +2,6 @@
 
 Agent Skills for use with Obsidian.
 
-Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with customizations: **`obsidian-cli` removed**; added **`obsidian-user-vault`** (Wei vault rules: no-space filenames, `createBy`/`updateBy`).
 
 These skills follow the [Agent Skills specification](https://agentskills.io/specification) so they can be used by any skills-compatible agent, including Claude Code, Codex, Open Code, and Hermes.
 
