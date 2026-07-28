@@ -1,4 +1,10 @@
-# Obsidian Skills
+# Obsidian Skills (TeemoKench fork)
+
+Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with customizations:
+- **`obsidian-cli` removed** (not used here)
+- kepano four kept: markdown / bases / json-canvas / defuddle
+- may include **`obsidian-user-vault`** (local vault playbook)
+
 
 Agent Skills for use with Obsidian.
 
