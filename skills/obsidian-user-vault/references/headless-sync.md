@@ -1,112 +1,99 @@
-# Obsidian Headless Sync — Hermes host
+# Obsidian Headless Sync (portable)
+
+Official docs: https://obsidian.md/help/sync/headless
+
+Use with `obsidian-user-vault`. Resolve paths from `local-config.md` or env (`OBSIDIAN_VAULT_PATH`, `OBSIDIAN_OB_HOME`, …). Below, `$VAULT` and `$OB_HOME` mean those resolved absolute values.
 
 ## Identity (critical)
 
-| Who | HOME | config path |
-|-----|------|-------------|
-| Hermes agent | `/opt/data/home` | `/opt/data/home/.config/obsidian-headless/` |
-| VS Code Attach Shell (default) | `/root` | `/root/.config/obsidian-headless/` |
+`ob` stores login under **`$HOME/.config/obsidian-headless/`**.
 
-Always for `ob`:
+| Pitfall | What goes wrong |
+|---------|-----------------|
+| Agent uses user A, you logged in as root | Token in `/root/...`, agent cannot see it |
+| Two different `HOME` values | "Logged in" on one shell, logged out on another |
+
+Always:
 
 ```bash
-export HOME=/opt/data/home
-export PATH="/opt/data/home/.npm-global/bin:/opt/data/bin:$PATH"
+export HOME="$OB_HOME"          # e.g. from local-config OBSIDIAN_OB_HOME
+export PATH="$OB_PATH:$PATH"    # directory containing `ob`
 ```
 
-## Current vault binding
-
-- Local: `/opt/data/obsidian`
-- Remote name: **Claw**
-- Vault id: `f73facb9e709a5a0970f4074ad5cff69`
-- Host: `sync-39.obsidian.md` (Asia)
-- Mode: bidirectional · conflict: merge
-- Config sync: disabled (notes/attachments only)
-- Account label seen by CLI: Tom_Kench
-
-## Install CLI (no root /usr)
+## Install CLI
 
 ```bash
-npm config set prefix /opt/data/home/.npm-global
+# user-level npm prefix example (no root)
+npm config set prefix "${OB_HOME}/.npm-global"
 npm install -g obsidian-headless
-ln -sfn /opt/data/home/.npm-global/bin/ob /opt/data/bin/ob
+export PATH="${OB_HOME}/.npm-global/bin:$PATH"
 ob --version
 ```
 
-Docs: https://obsidian.md/help/sync/headless
+Any install method is fine if `ob` is on `PATH` for the agent user.
 
 ## First-time setup
 
 ```bash
+export HOME="$OB_HOME"
 ob login
 ob sync-list-remote
-cd /opt/data/obsidian   # or --path
-ob sync-setup --vault "Claw"   # or vault id
-ob sync --path /opt/data/obsidian
-```
-
-## Root → hermes migration (after Attach Shell login)
-
-```bash
-# as root
-mkdir -p /opt/data/home/.config
-cp -a /root/.config/obsidian-headless /opt/data/home/.config/
-chown -R 1000:1000 /opt/data/home/.config/obsidian-headless
-chown -R 1000:1000 /opt/data/obsidian
-su -s /bin/bash hermes -c '
-  export HOME=/opt/data/home
-  export PATH="/opt/data/home/.npm-global/bin:/opt/data/bin:$PATH"
-  ob login
-  ob sync-status --path /opt/data/obsidian
-'
+ob sync-setup --path "$VAULT" --vault "<RemoteName-or-id>"
+ob sync --path "$VAULT"
 ```
 
 ## Continuous sync
 
 ```bash
-# Hermes: terminal(background=true) — do not use nohup in blocked shells
-ob sync --path /opt/data/obsidian --continuous
+# Long-running: prefer your agent's background process API
+# Redirect stdout/stderr to OBSIDIAN_SYNC_LOG if you use a log file
+ob sync --path "$VAULT" --continuous
 ```
 
-- Log: `/opt/data/logs/obsidian-sync.log`
-- Pid: `/opt/data/logs/obsidian-sync.pid`
-- Watchdog script: `/opt/data/scripts/obsidian-sync-watchdog.sh` (cron every 5m, silent when healthy)
-- Optional boot service draft: `/opt/data/scripts/s6-obsidian-sync/` (needs root install)
+Recommended extras (per host):
+
+- Log file: `OBSIDIAN_SYNC_LOG`
+- Pid file: `OBSIDIAN_SYNC_PID`
+- Cron/systemd watchdog that restarts continuous if dead
+- **Do not** run desktop Obsidian Sync on the same device while headless continuous is active
 
 ## Status interpretation
 
 | Signal | Meaning |
 |--------|---------|
-| `ob login` prints email | token OK for this HOME |
-| `ob sync-status` shows Vault/Location | local config linked |
-| log `Fully synced` | last pass completed |
-| `pgrep -af 'ob sync.*continuous'` | watcher alive |
-| empty `.obsidian` except empty dir | config categories not synced (expected if disabled) |
+| `ob login` shows account | token OK for this `HOME` |
+| `ob sync-status --path "$VAULT"` | local folder linked (config only) |
+| log contains `Fully synced` | last pass completed |
+| `pgrep -af 'ob sync.*continuous'` | watcher process alive |
 
 ## Pre-write gate (mandatory before vault mutations)
 
-Continuous sync **can freeze**. Before create/edit/move/delete under `/opt/data/obsidian`:
+Continuous sync **can freeze**. Before create/edit/move/delete under `$VAULT`:
 
 ```bash
-export HOME=/opt/data/home
-export PATH="/opt/data/home/.npm-global/bin:/opt/data/bin:$PATH"
-pgrep -af 'ob sync.*continuous' || cat /opt/data/logs/obsidian-sync.pid 2>/dev/null
-tail -40 /opt/data/logs/obsidian-sync.log
-ob sync-status --path /opt/data/obsidian
+export HOME="$OB_HOME"
+export PATH="$OB_PATH:$PATH"
+pgrep -af 'ob sync.*continuous' || cat "${OBSIDIAN_SYNC_PID}" 2>/dev/null
+tail -40 "${OBSIDIAN_SYNC_LOG}"
+ob sync-status --path "$VAULT"
 ```
 
 **OK to write:** continuous process alive + log not stuck in a hard error loop.
 
-**If dead/stuck:** inspect log → stop wedged continuous `ob sync` carefully → restart with Hermes `terminal(background=true)`:
+**If dead/stuck:**
 
-```bash
-ob sync --path /opt/data/obsidian --continuous
-```
-
-Re-check, then write. If still broken, tell Wei and **do not write** unless Wei explicitly allows local-only edits.
+1. Read log tail  
+2. Stop only the wedged continuous `ob sync`  
+3. Restart continuous for `$VAULT`  
+4. Re-check, then write  
+5. If still broken → tell the user; default **do not write** unless they allow local-only edits  
 
 `ob sync-status` alone is **not** proof the watcher is healthy.
 
-## LifeTips note placement
+## Migrating credentials between OS users
 
-Short life SOPs/recipes → `3-Resources/LifeTips/<name-with-dashes>.md`
+If you accidentally logged in as root (or another user), copy the config directory into the agent user's `OBSIDIAN_OB_HOME/.config/obsidian-headless/`, fix ownership, then `ob login` / `ob sync-status` as the agent user.
+
+## LifeTips placement tip
+
+Short life SOPs/recipes → `3-Resources/LifeTips/<name-with-dashes>.md` under `$VAULT`.
