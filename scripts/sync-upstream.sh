@@ -97,9 +97,9 @@ if [[ -f README.md ]] && ! grep -q 'TeemoKench fork' README.md; then
     echo "# Obsidian Skills (TeemoKench fork)"
     echo
     echo "Fork of [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) with customizations:"
-    echo "- **\`obsidian-cli\` removed** (not used here)"
-    echo "- kepano four kept: markdown / bases / json-canvas / defuddle"
-    echo "- may include **\`obsidian-user-vault\`** (local vault playbook)"
+    echo "- **\`obsidian-cli\` removed** — needs Obsidian Desktop GUI; not suitable for pure CLI / headless hosts"
+    echo "- Upstream four kept: **markdown / bases / json-canvas / defuddle**"
+    echo "- Added **\`obsidian-user-vault\`** — template skill for a user vault on **Obsidian Sync**, with \`init_guide.md\` onboarding"
     echo
     awk 'BEGIN{skip=0} /^# / && !skip {skip=1; next} {print}' README.md
   } >"$tmp"
@@ -110,7 +110,7 @@ fi
 
 # Keep vault skill listed if directory exists
 if [[ -d skills/obsidian-user-vault && -f README.md ]] && ! grep -q 'obsidian-user-vault' README.md; then
-  row='| [obsidian-user-vault](skills/obsidian-user-vault) | Portable vault playbook: resolve path via `local-config`/env, PARA, no-space names, `createBy`/`updateBy`, **headless Sync gate before writes** |'
+  row='| [obsidian-user-vault](skills/obsidian-user-vault) | **Template** playbook for the user’s Sync vault: path + optional structure placeholders, create/edit/search rules, Sync gate, hard rules; onboard via `init_guide.md` |'
   if grep -q '^\| \[defuddle\]' README.md; then
     tmp="$(mktemp)"
     awk -v row="$row" '/^\| \[defuddle\]/ {print; print row; next} {print}' README.md >"$tmp"
